@@ -85,9 +85,9 @@ def convert_datasets(base_dir: Path):
     y_test_cats = np.array(np.isin(y_test_raw, cat_indices), dtype=int)
 
     train_files = convert(x_data=x_train, y_data=y_train_cats, out_path=base_train_dir)
-    valid_files = convert(x_data=x_test, y_data=y_test_cats, out_path=base_test_dir)
+    test_files = convert(x_data=x_test, y_data=y_test_cats, out_path=base_test_dir)
 
-    return train_files, valid_files
+    return train_files, test_files
 
 
 def get_dataset(filenames: typing.List[Path],
