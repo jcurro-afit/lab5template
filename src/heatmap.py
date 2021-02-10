@@ -19,13 +19,14 @@ def main():
     # Heat map of class activation
     # The local path to our target image
     # This is similar to the example in Section 5.4 from the Chollet book
-    img_paths = ['artemis.jpg', 'freya.jpg']
+    img_names = ['artemis.jpg', 'freya.jpg']
     model = VGG16(weights='imagenet')
 
-    for img_path in img_paths:
+    for img_name in img_names:
+        img_path = str(_FILE_PATH / img_name)
 
         # `img` is a PIL image of size 224x224
-        img = image.load_img(str(_FILE_PATH / img_path), target_size=(224, 224))
+        img = image.load_img(img_path, target_size=(224, 224))
 
         # `x` is a float32 Numpy array of shape (224, 224, 3)
         x = image.img_to_array(img)
@@ -57,10 +58,11 @@ def main():
 
         # for some reason the plot shows the colors backwards but the saved image does not. weird
         plt.subplot(1, 3, 3)
-        plt.imshow(superimposed_img / 255.)
+        # flip the BGR of cv2 to the normal RGB
+        plt.imshow(superimposed_img[..., [2, 1, 0]] / 255.)
 
         # Save the image to disk
-        cv2.imwrite(str(_FILE_PATH / f"heatmap_{img_path}"), superimposed_img)
+        cv2.imwrite(str(_FILE_PATH / f"heatmap_{img_name}"), superimposed_img)
 
         plt.show()
 
