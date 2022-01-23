@@ -15,6 +15,7 @@ _FILE_PATH = Path(__file__).parent.absolute()
 
 
 # this is from Chollet Jupyter Notebooks Section 5.4
+# https://github.com/fchollet/deep-learning-with-python-notebooks/blob/660498db01c0ad1368b9570568d5df473b9dc8dd/first_edition/5.4-visualizing-what-convnets-learn.ipynb
 def main():
     # Heat map of class activation
     # The local path to our target image
@@ -34,6 +35,9 @@ def main():
         plt.figure()
         plt.subplot(1, 3, 1)
         plt.imshow(x / 255.)
+
+        # TODO: make a prediction for the image
+        print(f'Predicted classes for {img_name}: ...')
 
         # TODO: make a heatmap from the model using the input image
 

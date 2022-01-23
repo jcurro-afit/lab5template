@@ -38,6 +38,12 @@ def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
 
+# this function was added since the _int64_feature takes a single int and not a list of ints
+def _int64_list_feature(value: typing.List[int]):
+    """Returns an int64_list from a list of bool / enum / int / uint."""
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
+
+
 def convert(x_data: np.ndarray,
             y_data: np.ndarray,
             out_path: Path,
@@ -110,16 +116,24 @@ def get_dataset(filenames: typing.List[Path],
         y_sample = None
         return x_sample, y_sample
 
-    filename_str = [str(filename) for filename in filenames]
-    dataset = tf.data.TFRecordDataset(filenames=filename_str,
-                                      compression_type=None,
-                                      buffer_size=None,
-                                      num_parallel_reads=tf.data.experimental.AUTOTUNE)
+    # the tf functions takes string names not path objects, so we have to convert that here
+    filenames_str = [str(filename) for filename in filenames]
+    # make a dataset from slices of our file names
+    files_dataset = tf.data.Dataset.from_tensor_slices(filenames_str)
+
+    # make an interleaved reader for the TFRecordDataset files
+    # this will give us a stream of the serialized data interleaving from each file
+    dataset = files_dataset.interleave(map_func=lambda x: tf.data.TFRecordDataset(x),
+                                       # TODO: change the cycle_length according to your number of files
+                                       cycle_length=1,  # how many files to cycle through at once
+                                       block_length=1,  # how many samples from each file to get
+                                       num_parallel_calls=tf.data.experimental.AUTOTUNE,
+                                       deterministic=False)
+
     # Parse the serialized data in the TFRecords files.
     # This returns TensorFlow tensors for the image and labels.
     dataset = dataset.map(map_func=_parse_function,
                           num_parallel_calls=tf.data.experimental.AUTOTUNE)
-
     return dataset
 
 
@@ -248,7 +262,7 @@ def main():
     valid_dataset: tf.data.Dataset = get_dataset(valid_files, img_shape=data_img_shape)
     test_dataset: tf.data.Dataset = get_dataset(test_files, img_shape=data_img_shape)
 
-    # TODO scale, shuffle, batch and repeat the datasets
+    # TODO repeat, shuffle, scale, batch and prefetch the datasets
 
     # check our dataset by visualizing it. Note this can go forever if you let it
     if visualize_dataset:
