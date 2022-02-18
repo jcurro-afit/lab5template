@@ -124,8 +124,7 @@ def get_dataset(filenames: typing.List[Path],
     # make an interleaved reader for the TFRecordDataset files
     # this will give us a stream of the serialized data interleaving from each file
     dataset = files_dataset.interleave(map_func=lambda x: tf.data.TFRecordDataset(x),
-                                       # TODO: change the cycle_length according to your number of files
-                                       cycle_length=1,  # how many files to cycle through at once
+                                       cycle_length=len(filenames),  # how many files to cycle through at once
                                        block_length=1,  # how many samples from each file to get
                                        num_parallel_calls=tf.data.experimental.AUTOTUNE,
                                        deterministic=False)
